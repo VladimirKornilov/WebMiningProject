@@ -1,0 +1,14 @@
+#lines started with '#' symbol are comments
+#
+#file with urls
+urls.txt
+#file path to save html code of sites(Example:data/html/ or C://html/)
+data/html/
+#file path to save a structures of headings(Example:data/structures/)
+data/structures/
+#file path to save a main text of the pages(Example:data/texts/)
+data/texts/
+#file with tags that need to remove from target text file
+specSymbols.txt
+#count of pages of google search that will be processed by app(needs for search method)
+2
