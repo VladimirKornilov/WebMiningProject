@@ -25,6 +25,11 @@ public class Controller extends Thread {
 	public static MainWindow window;
 	public static List<String> exceptionsLog = new ArrayList<>();
 	private static CountDownLatch cdl;
+	private static Config config;
+	private static String absolutePath = null;
+	
+	//File names for text mining
+	private static List<String> fileNames = new ArrayList<String>();
 	
 	@Override
 	public void run() {
@@ -41,7 +46,6 @@ public class Controller extends Thread {
 		long finishTime;
 		double resultTimeSec;
 		List<String> stringUrls = new ArrayList<>();
-		Config config;
 		switch(window.getInputType()){
 		case CONFIG:
 			config = Config.getInstance(true);
@@ -110,8 +114,31 @@ public class Controller extends Thread {
 				window.addToLogs(log);
 		}
 		window.addToLogs("-----------------------------------------------------------------------------");
+		
+		window.addToLogs("Executing of text clustering");
+		String fileNamesStr = getFileNamesAsSingleString();
+		
+		try {
+			File f = new File("C:\\Users\\vladimir.kornilov\\Python\\TextMining\\TextStageProcessor\\");
+			String command = "python stage_text_processor.py ";
+			Process p = Runtime.getRuntime().exec(command + fileNamesStr, null, f);
+			p.waitFor();
+		} catch (IOException e) {
+			window.addToLogs("Exception with running clustering algorithm!");
+			e.printStackTrace();
+		}
 	}
-
+	
+	private static String getFileNamesAsSingleString() {
+		String result = "";
+		for(int i = 0; i != fileNames.size();i++) {
+			if(i != 0)
+				result+= ';' + fileNames.get(i);
+			else result += fileNames.get(i);
+		}
+		return result;
+	}
+	
 	public static synchronized void writeToTxt(List<String> source, String path) {
 		if (source != null && !source.isEmpty()) {
 			String directory = path.substring(0, (path.lastIndexOf('/') + 1));
@@ -125,6 +152,11 @@ public class Controller extends Thread {
 						fw.write(str);
 						fw.write("\r\n");
 					}
+				}
+				if(path.contains(config.getHtmlMainTextFilePath())) {
+					String fileName = path.substring(path.lastIndexOf('/'), path.length());
+					absolutePath = folder.getAbsolutePath();
+					fileNames.add(absolutePath + fileName);
 				}
 			} catch (FileNotFoundException e) {
 				window.addToLogs("Could not create a txt file " + directory);
