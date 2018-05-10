@@ -19,6 +19,7 @@ public class Config {
 	private String htmlStructFilePath;
 	private String htmlMainTextFilePath;
 	private String specSymbolsFilePath;
+	private String textMiningPath;
 	private List<String> config;
 	private List<String> specSymbols;
 	private int countOfPages = 0;
@@ -66,6 +67,10 @@ public class Config {
 		return countOfPages;
 	}
 
+	public String getTextMiningPath() {
+		return textMiningPath;
+	}
+
 	private void configParse() {
 		try {
 			int n = config.size();
@@ -91,6 +96,9 @@ public class Config {
 									specSymbolsFilePath = "specSymbols.txt";
 								if(n > 5) {
 									countOfPages  = Integer.valueOf(config.get(5));
+									if(n > 6) {
+										textMiningPath = config.get(6);
+									}
 								}
 							}
 						}

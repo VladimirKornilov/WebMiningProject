@@ -12,3 +12,5 @@ data/texts/
 specSymbols.txt
 #count of pages of google search that will be processed by app(needs for search method)
 2
+#path to stage_text_processor root package
+C:/Users/vladimir.kornilov/Python/TextMining/TextStageProcessor/

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.tstu.configuration.Config;
 import com.tstu.gui.MainWindow;
 import com.tstu.htmlProcessing.HtmlCode;
@@ -116,16 +118,19 @@ public class Controller extends Thread {
 		window.addToLogs("-----------------------------------------------------------------------------");
 		
 		window.addToLogs("Executing of text clustering");
-		String fileNamesStr = getFileNamesAsSingleString();
 		
+		String textMiningPath = config.getTextMiningPath();
+		if(textMiningPath!=null && StringUtils.isNotBlank(textMiningPath)) {
+			String fileNamesStr = getFileNamesAsSingleString();
 		try {
-			File f = new File("C:\\Users\\vladimir.kornilov\\Python\\TextMining\\TextStageProcessor\\");
+			File f = new File(textMiningPath);
 			String command = "python stage_text_processor.py ";
 			Process p = Runtime.getRuntime().exec(command + fileNamesStr, null, f);
 			p.waitFor();
 		} catch (IOException e) {
 			window.addToLogs("Exception with running clustering algorithm!");
 			e.printStackTrace();
+		}
 		}
 	}
 	
