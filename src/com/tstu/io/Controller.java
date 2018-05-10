@@ -3,11 +3,15 @@ package com.tstu.io;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -105,7 +109,7 @@ public class Controller extends Thread {
 		resultTimeSec = ((double)finishTime - (double)startTime)/1000;
 		window.addToLogs("\n");
 		window.addToLogs("-----------------------------------------------------------------------------");
-		window.addToLogs("COMPLETE!!!");
+		window.addToLogs("Processing complete");
 		window.addToLogs("Execution time is " + resultTimeSec + " sec");
 		if (exceptionsLog.size() == 0) {
 			window.addToLogs("There are no exceptions in progress of execution!");
@@ -116,22 +120,38 @@ public class Controller extends Thread {
 				window.addToLogs(log);
 		}
 		window.addToLogs("-----------------------------------------------------------------------------");
-		
-		window.addToLogs("Executing of text clustering");
-		
-		String textMiningPath = config.getTextMiningPath();
-		if(textMiningPath!=null && StringUtils.isNotBlank(textMiningPath)) {
-			String fileNamesStr = getFileNamesAsSingleString();
-		try {
-			File f = new File(textMiningPath);
-			String command = "python stage_text_processor.py ";
-			Process p = Runtime.getRuntime().exec(command + fileNamesStr, null, f);
-			p.waitFor();
-		} catch (IOException e) {
-			window.addToLogs("Exception with running clustering algorithm!");
-			e.printStackTrace();
-		}
-		}
+		Runnable clustering = new Runnable() {
+
+			@Override
+			public void run() {
+				window.addToLogs("Executing of text clustering");
+
+				String textMiningPath = config.getTextMiningPath();
+				if (textMiningPath != null && StringUtils.isNotBlank(textMiningPath)) {
+					String fileNamesStr = getFileNamesAsSingleString();
+					StringBuffer output = new StringBuffer();
+					try {
+						File f = new File(textMiningPath);
+						String command = "python stage_text_processor.py " + fileNamesStr;
+						Process p = Runtime.getRuntime().exec(command, null, f);
+						window.addToLogs(command + fileNamesStr);
+						p.waitFor();
+						BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+						String line = "";
+						while ((line = reader.readLine()) != null) {
+							output.append(line + "\n");
+						}
+						window.addToLogs(output.toString());
+						window.addToLogs("Clustering complete!");
+					} catch (IOException | InterruptedException e) {
+						window.addToLogs("Exception with running clustering algorithm!");
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		clustering.run();
 	}
 	
 	private static String getFileNamesAsSingleString() {
@@ -151,7 +171,7 @@ public class Controller extends Thread {
 			if (!folder.exists())
 				if (folder.mkdirs())
 					window.addToLogs("Directory " + directory + "created successfully!");
-			try (FileWriter fw = new FileWriter(path, false)) {
+			try (Writer fw = new OutputStreamWriter(new FileOutputStream(path, false),StandardCharsets.UTF_8)) {
 				for (String str : source) {
 					if (str != null) {
 						fw.write(str);
@@ -175,7 +195,7 @@ public class Controller extends Thread {
 	}
 	
 	public static void writeGoogleToTxt(String text, String path) {
-		try (FileWriter fw = new FileWriter(path, false)) {
+		try (Writer fw = new OutputStreamWriter(new FileOutputStream(path, false),StandardCharsets.UTF_8)) {
 			fw.write(text);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
