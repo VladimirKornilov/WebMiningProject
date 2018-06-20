@@ -33,6 +33,7 @@ public class Controller extends Thread {
 	private static CountDownLatch cdl;
 	private static Config config;
 	private static String absolutePath = null;
+	private static final int MAX_SEARCH_RESULT = 10;
 	
 	//File names for text mining
 	private static List<String> fileNames = new ArrayList<String>();
@@ -66,7 +67,7 @@ public class Controller extends Thread {
 			GetRequest get;
 			for (int i = 0; i <= config.getCountOfPages(); i++) {
 				get = new GetRequest(window.getTextField().getText(), i);
-				stringUrls.addAll(SearchResultProcessing.getUrlsFromSearchResult(get.getHtml(), 10));
+				stringUrls.addAll(SearchResultProcessing.getUrlsFromSearchResult(get.getHtml(), MAX_SEARCH_RESULT));
 			}
 			break;
 		default:
